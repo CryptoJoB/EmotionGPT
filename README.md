@@ -13,7 +13,7 @@ EmotionGPT offers a lightweight yet deeply expressive simulation of sentient AI,
 
 
 # Setup
-Terminal -> python3 -m http.server 8080
-Terminal -> Ollama run phi3.5 (ollama phi3.5 must be installed!)
-Open browser -> http://localhost:8080/Downloads/emotiongpt_v3%20final.html
-Enjoy!
+Terminal -> python3 -m http.server 8080  
+Terminal -> Ollama run phi3.5 (ollama phi3.5 must be installed!)  
+Open browser -> http://localhost:8080/Downloads/emotiongpt_v3%20final.html  
+Enjoy!  
