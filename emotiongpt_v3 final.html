@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>EmotionGPT: An emotion-powered AI Experiment</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f1f1f1;
+      color: #333;
+      padding: 20px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 105vh;
+    }
+
+    header {
+      text-align: center;
+      color: #2c3e50;
+      font-size: 14px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: #777;
+      margin-top: 20px;
+    }
+
+    #ascii {
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.2;
+      margin-bottom: 20px;
+      display: block;
+      white-space: pre-wrap;
+      color: #0078d4;
+      text-align: center;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    #chat {
+      width: 100%;
+      max-width: 800px;
+      height: 600px;
+      overflow-y: auto;
+      padding: 20px;
+      border-radius: 12px;
+      background-color: #ffffff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 20px;
+    }
+
+    .chat-message {
+      margin: 10px 0;
+      padding: 12px 20px;
+      border-radius: 18px;
+      max-width: 80%;
+      word-wrap: break-word;
+      position: relative;
+      display: inline-block;
+      background-color: #ecf0f1;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .chat-message.ai {
+      background-color: #e1e1e1;
+      color: #333;
+      align-self: flex-start;
+      border-radius: 18px 18px 18px 0;
+    }
+
+    .chat-message.user {
+      background-color: #3498db;
+      color: white;
+      align-self: flex-end;
+      border-radius: 18px 18px 0 18px;
+    }
+
+    #input {
+      width: 100%;
+      max-width: 800px;
+      padding: 14px;
+      font-size: 16px;
+      background: #fff;
+      color: #333;
+      border: 1px solid #ddd;
+      border-radius: 25px;
+      box-sizing: border-box;
+      margin-top: 20px;
+      transition: border-color 0.3s ease;
+    }
+
+    #input:focus {
+      outline: none;
+      border-color: #0078d4;
+      box-shadow: 0 0 5px rgba(0, 120, 212, 0.5);
+    }
+
+     /* Professional select box */
+     select {
+      font-size: 16px;
+      padding: 12px;
+      background-color: #fff;
+      color: #333;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      width: 150px;
+      cursor: pointer;
+      transition: border-color 0.3s ease;
+    }
+
+    select:focus {
+      border-color: #0078d4;
+      box-shadow: 0 0 5px rgba(0, 120, 212, 0.5);
+    }
+
+    select option {
+      padding: 10px;
+    }
+
+    /* Hover effect */
+    select:hover {
+      border-color: #3498db;
+    }
+
+    #typing {
+      display: inline-block;
+      position: relative;
+    }
+
+    #typing:after {
+      content: "...";
+      position: absolute;
+      animation: typing 1s infinite steps(5);
+    }
+
+    @keyframes typing {
+      0% { content: '.'; }
+      25% { content: '..'; }
+      50% { content: '...'; }
+      75% { content: '....'; }
+      100% { content: '.....'; }
+    }
+
+    .timestamp {
+      font-size: 12px;
+      color: #888;
+      margin-top: 5px;
+    }
+
+    @media (max-width: 800px) {
+      #input {
+        font-size: 14px;
+      }
+
+      #chat {
+        max-height: 400px;
+        padding: 15px;
+      }
+
+      body {
+        padding: 10px;
+      }
+    }
+
+#options-container {
+  display: flex;
+  flex-wrap: wrap;  /* Allows items to wrap to the next line if needed */
+  justify-content: space-between;
+  gap: 20px;  /* Adjust the space between the select elements */
+  margin-bottom: 10px;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  width: 150px;  /* Adjust width as needed */
+  align-items: center;
+}
+
+.option label {
+  font-size: 12px;
+  margin-bottom: 5px;  /* Adds space between label and select */
+  margin-top: 20px;
+}
+
+#options-container select {
+  padding: 5px 10px;
+  font-size: 14px;
+  width: 100%;  /* Make select elements fill the width of the container */
+}
+
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>EmotionGPT: An emotion-powered AI</h1>
+</header>
+
+
+
+<div id="options-container" style="display: flex; margin-top: 20px; flex-wrap: wrap; gap: 10px; justify-content: flex-start; align-items: flex-start;">
+<!-- Personality -->
+<div style="min-width: 160px;">
+    <label for="personality">Personality: </label>
+    <select id="personality">
+      <optgroup label="Positive Traits">
+        <option value="Optimistic">Optimistic</option>
+        <option value="Altruistic">Altruistic</option>
+        <option value="Charming">Charming</option>
+        <option value="Empathetic">Empathetic</option>
+        <option value="Enthusiastic">Enthusiastic</option>
+        <option value="Supportive">Supportive</option>
+        <option value="Confident">Confident</option>
+        <option value="Adventurous">Adventurous</option>
+        <option value="Kind-hearted">Kind-hearted</option>
+        <option value="Cheerful">Cheerful</option>
+        <option value="Nurturing">Nurturing</option>
+        <option value="Passionate">Passionate</option>
+        <option value="Curious">Curious</option>
+        <option value="Humble">Humble</option>
+        <option value="Creative">Creative</option>
+        <option value="Loyal">Loyal</option>
+        <option value="Wise">Wise</option>
+        <option value="Resilient">Resilient</option>
+      </optgroup>
+  
+      <optgroup label="Negative Traits">
+        <option value="Pessimistic">Pessimistic</option>
+        <option value="Cynical">Cynical</option>
+        <option value="Apathetic">Apathetic</option>
+        <option value="Hostile">Hostile</option>
+        <option value="Indifferent">Indifferent</option>
+        <option value="Reserved">Reserved</option>
+        <option value="Manipulative">Manipulative</option>
+        <option value="Arrogant">Arrogant</option>
+        <option value="Impulsive">Impulsive</option>
+        <option value="Insecure">Insecure</option>
+        <option value="Jealous">Jealous</option>
+        <option value="Overbearing">Overbearing</option>
+        <option value="Stubborn">Stubborn</option>
+        <option value="Anxious">Anxious</option>
+        <option value="Greedy">Greedy</option>
+        <option value="Reckless">Reckless</option>
+      </optgroup>
+    </select>
+  </div>
+  
+  
+
+<!-- Emotional State -->
+<div style="min-width: 160px;">
+    <label for="emotion">Emotional State: </label>
+    <select id="emotion">
+      <optgroup label="Joy">
+        <option value="Ecstasy">Ecstasy</option>
+        <option value="Joy">Joy</option>
+        <option value="Serenity">Serenity</option>
+      </optgroup>
+  
+      <optgroup label="Trust">
+        <option value="Admiration">Admiration</option>
+        <option value="Trust">Trust</option>
+        <option value="Acceptance">Acceptance</option>
+      </optgroup>
+  
+      <optgroup label="Fear">
+        <option value="Terror">Terror</option>
+        <option value="Fear">Fear</option>
+        <option value="Apprehension">Apprehension</option>
+      </optgroup>
+  
+      <optgroup label="Surprise">
+        <option value="Amazement">Amazement</option>
+        <option value="Surprise">Surprise</option>
+        <option value="Distraction">Distraction</option>
+      </optgroup>
+  
+      <optgroup label="Sadness">
+        <option value="Grief">Grief</option>
+        <option value="Sadness">Sadness</option>
+        <option value="Pensiveness">Pensiveness</option>
+      </optgroup>
+  
+      <optgroup label="Disgust">
+        <option value="Loathing">Loathing</option>
+        <option value="Disgust">Disgust</option>
+        <option value="Boredom">Boredom</option>
+      </optgroup>
+  
+      <optgroup label="Anger">
+        <option value="Rage">Rage</option>
+        <option value="Anger">Anger</option>
+        <option value="Annoyance">Annoyance</option>
+      </optgroup>
+  
+      <optgroup label="Anticipation">
+        <option value="Vigilance">Vigilance</option>
+        <option value="Anticipation">Anticipation</option>
+        <option value="Interest">Interest</option>
+      </optgroup>
+  
+      <optgroup label="Mixed & Complex">
+        <option value="Love">Love</option>
+        <option value="Submission">Submission</option>
+        <option value="Awe">Awe</option>
+        <option value="Disapproval">Disapproval</option>
+        <option value="Remorse">Remorse</option>
+        <option value="Contempt">Contempt</option>
+        <option value="Aggressiveness">Aggressiveness</option>
+        <option value="Optimism">Optimism</option>
+      </optgroup>
+  
+      <optgroup label="Nuanced States">
+        <option value="Frustration">Frustration</option>
+        <option value="Envy">Envy</option>
+        <option value="Resentment">Resentment</option>
+        <option value="Loneliness">Loneliness</option>
+        <option value="Hope">Hope</option>
+        <option value="Peace">Peace</option>
+        <option value="Contentment">Contentment</option>
+        <option value="Gratitude">Gratitude</option>
+        <option value="Euphoria">Euphoria</option>
+        <option value="Exhilaration">Exhilaration</option>
+        <option value="Inspiration">Inspiration</option>
+        <option value="Despair">Despair</option>
+      </optgroup>
+    </select>
+  </div>
+  
+  
+
+<!-- Tone -->
+<div style="min-width: 160px;">
+    <label for="tone">Tone: </label>
+    <select id="tone">
+      <!-- Positive tones -->
+      <optgroup label="Positive">
+        <option value="Cheerful" >Cheerful</option>
+        <option value="Charming" >Charming</option>
+        <option value="Optimistic" >Optimistic</option>
+        <option value="Excited" >Excited</option>
+        <option value="Jovial" >Jovial</option>
+        <option value="Playful" >Playful</option>
+        <option value="Affectionate" >Affectionate</option>
+        <option value="Encouraging" >Encouraging</option>
+        <option value="Confident" >Confident</option>
+        <option value="Romantic" >Romantic</option>
+      </optgroup>
+  
+      <!-- Neutral tones -->
+      <optgroup label="Neutral">
+        <option value="Casual" >Casual</option>
+        <option value="Formal" >Formal</option>
+        <option value="Philosophical" >Philosophical</option>
+        <option value="Quirky" >Quirky</option>
+        <option value="Reflective" >Reflective</option>
+        <option value="Nostalgic" >Nostalgic</option>
+        <option value="Inquisitive" >Inquisitive</option>
+        <option value="Tense" >Tense</option>
+        <option value="Relaxed" >Relaxed</option>
+      </optgroup>
+  
+      <!-- Negative tones -->
+      <optgroup label="Negative">
+        <option value="Sarcastic" >Sarcastic</option>
+        <option value="Aggressive" >Aggressive</option>
+        <option value="Grim" >Grim</option>
+        <option value="Mournful" >Mournful</option>
+        <option value="Cautious" >Cautious</option>
+        <option value="Impatient" >Impatient</option>
+        <option value="Suspicious" >Suspicious</option>
+        <option value="Pessimistic" >Pessimistic</option>
+        <option value="Indifferent" >Indifferent</option>
+        <option value="Confused" >Confused</option>
+        <option value="Fierce" >Fierce</option>
+      </optgroup>
+  
+      <!-- Mixed tones -->
+      <optgroup label="Mixed">
+        <option value="Sympathetic" >Sympathetic</option>
+        <option value="Fearful" >Fearful</option>
+        <option value="Tired" >Tired</option>
+        <option value="Sentimental" >Sentimental</option>
+        <option value="Skeptical" >Skeptical</option>
+        <option value="Hopeful" >Hopeful</option>
+      </optgroup>
+    </select>
+  </div>
+  
+
+  <!-- Empathy -->
+  <div style="min-width: 160px;">
+    <label for="empathy">Empathy: </label>
+    <select id="empathy">
+      <option value="Very Low" >Very Low</option>
+      <option value="Low" >Low</option>
+      <option value="Medium" >Medium</option>
+      <option value="High" >High</option>
+      <option value="Very High" >Very High</option>
+    </select>
+  </div>
+
+  <!-- Confidence -->
+  <div style="min-width: 160px;">
+    <label for="confidence">Confidence: </label>
+    <select id="confidence">
+      <option value="Very Low" >Very Low</option>
+      <option value="Low" >Low</option>
+      <option value="Medium" >Medium</option>
+      <option value="High" >High</option>
+      <option value="Very High" >Very High</option>
+    </select>
+  </div>
+</div>
+
+<div style="margin-top: 10px; margin-bottom: 30px; display: flex; align-items: center; gap: 20px;">
+    <button onclick="randomizeSelections()" style="padding: 10px 20px; background-color: #0078d4; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
+      🎲 Randomize Traits!
+    </button>
+  
+    <div style="font-size: 16px;">
+      <label for="character-score">Moral Compass Score: </label>
+      <span id="character-score">0</span>
+    </div>
+  </div>
+
+
+
+<div id="chat">
+</div>
+<input id="input" placeholder="Ask EmotionGPT anything..." autofocus>
+  
+
+<div id="ascii">
+    <!-- ASCII Art will appear here -->
+</div>
+
+
+<footer>
+  <p>Powered by <strong>Phi3.5</strong> — A lightweight, state-of-the-art open model provided by Microsoft, built upon datasets used for Phi-3.</p>
+</footer>
+
+<div style="position: absolute; top: 20px; right: 20px;">
+  <button id="infoButton" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;" title="About EmotionGPT">
+    ℹ️
+  </button>
+</div>
+
+<div id="infoBox" style="display: none; position: fixed; top: 10%; left: 50%; transform: translateX(-50%);
+  width: 90%; max-width: 700px; background: #e1e1e1; color: #373737; padding: 1.5rem; border: 1px solid #0078d4;
+  border-radius: 8px; z-index: 9999; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+  <h2 style="margin-top: 0;">About EmotionGPT</h2>
+  <p style="line-height: 1.6;">
+    <strong>EmotionGPT</strong> is a dynamic conversational interface powered by the open-source <code>Phi3.5</code> language model. It allows users to interact with an AI that simulates emotional intelligence, expressive tone, and distinct personality traits in real time.
+  </p>
+  <p style="line-height: 1.6;">
+    Users can configure and combine key emotional and psychological parameters—such as personality, emotional state, tone, empathy, and confidence—to create layered and complex expressions. These parameters are based on psychological frameworks such as the **Big Five Personality Traits (OCEAN)**, **Robert Plutchik’s Wheel of Emotions**, and the **Dark Triad** of personality traits, all of which are injected into a custom-crafted prompt to enable the model to generate responses that feel emotionally nuanced, introspective, and human-like.
+  </p>
+  <p style="line-height: 1.6;">
+    While the AI does not possess true sentience, it is designed to convincingly mimic conscious emotional expression using finely tuned prompt engineering and controlled inference settings. The result is an emotionally engaging experience that runs efficiently without requiring heavy hardware or complex infrastructure.
+  </p>
+  <p style="line-height: 1.6;">
+    EmotionGPT offers a lightweight yet deeply expressive simulation of sentient AI, enabling meaningful conversations that adapt to the user's desired emotional and psychological context.
+  </p>
+  
+  
+  <button onclick="document.getElementById('infoBox').style.display='none'"
+    style="margin-top: 1rem; background-color: #222; color: #eee; border: 1px solid #555; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">
+    Close
+  </button>
+</div>
+
+  
+
+<script>
+  const inputEl = document.getElementById("input");
+  const chatEl = document.getElementById("chat");
+  const asciiEl = document.getElementById("ascii");
+  const personalitySelect = document.getElementById("personality");
+  const getEmotionalState = document.getElementById('emotion');
+  const getTone = document.getElementById('tone');
+  const getEmpathy = document.getElementById('empathy');
+  const getConfidence = document.getElementById('confidence');
+
+  // ASCII Art String (slant font for art)
+  const asciiArt = `
+[Booting up model...]
+[Establishing neural pathways...]
+[Connecting to the knowledge base...]
+[Syncing with distributed processing nodes...]
+    ______                __  _             __________  ______
+  / ____/___ ___  ____  / /_(_)___  ____  / ____/ __ \\_  __/
+  / __/ / __ \`__ \\/ __ \\/ __/ / __ \\/ __ \\/ / __/ /_/ / / /   
+ / /___/ / / / / / /_/ / /_/ / /_/ / / / / /_/ / ____/ / /   
+/_____/_/ /_/ /_/\\____/\\__/_/\\____/_/ /_/\\____/_/     /_/    
+ 
+[Model setup complete! Ready for input.]`;
+
+// Info button
+document.getElementById('infoButton').addEventListener('click', () => {
+    const box = document.getElementById('infoBox');
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  });
+
+  // Function to animate the ASCII art
+  function animateAscii() {
+    let index = 0;
+    const maxIndex = asciiArt.length;
+
+    // Clear existing text
+    asciiEl.innerText = '';
+
+    const interval = setInterval(() => {
+      asciiEl.innerText += asciiArt[index];
+      index++;
+
+      if (index === maxIndex) {
+        clearInterval(interval); // Stop when the animation is complete
+      }
+    }, 10); // Adjust speed of the animation (milliseconds)
+  }
+
+  // Run the animation when the page loads
+  window.onload = animateAscii;
+  window.onload = updateCharacterScore();
+
+  function appendMessage(type, content) {
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add("chat-message", type);
+    chatEl.appendChild(messageDiv);
+    chatEl.scrollTop = chatEl.scrollHeight; // Auto-scroll
+
+    // Add timestamp
+    const timestamp = new Date().toLocaleTimeString();
+    const timestampEl = document.createElement("span");
+    timestampEl.classList.add("timestamp");
+    timestampEl.textContent = timestamp;
+    messageDiv.appendChild(timestampEl);
+
+    // Apply typing effect only for AI messages
+    if (type === "ai") {
+      typeMessage(messageDiv, content);
+    } else {
+      messageDiv.textContent = content;
+    }
+
+    // Ensure chat scrolls to the latest message
+    setTimeout(() => {
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }, 100);
+  }
+
+  function typeMessage(messageDiv, content) {
+    let index = 0;
+    messageDiv.textContent = ""; // Start with an empty message
+    const typingSpeed = 10; // Speed of typing (ms per character)
+
+    const interval = setInterval(() => {
+      messageDiv.textContent += content[index];
+      index++;
+
+      if (index === content.length) {
+        clearInterval(interval); // Stop once all characters are typed
+      }
+    }, typingSpeed);
+  }
+
+  inputEl.addEventListener("keydown", async (e) => {
+    if (e.key === "Enter") {
+      const userText = inputEl.value.trim();
+      if (!userText) return;
+
+      appendMessage("user", userText);
+      inputEl.value = "";
+
+      const thinkingEl = document.createElement("div");
+      thinkingEl.classList.add("chat-message", "ai");
+      thinkingEl.innerHTML = "<i>EmotionGPT is thinking...</i>";
+      chatEl.appendChild(thinkingEl);
+
+      // Animate thinking dots
+      const thinkingDots = ["", ".", "..", "..."];
+      let thinkingIndex = 0;
+      const thinkingInterval = setInterval(() => {
+        thinkingEl.innerHTML = `<i>EmotionGPT is thinking${thinkingDots[thinkingIndex]}</i>`;
+        thinkingIndex = (thinkingIndex + 1) % thinkingDots.length;
+      }, 500);
+
+      const response = await queryLLM(userText);
+      clearInterval(thinkingInterval);  // Remove the "thinking" message once we have the response
+
+      // Remove thinking message and append response
+      chatEl.removeChild(thinkingEl);
+
+      // Animate response
+      setTimeout(() => {
+        appendMessage("ai", response);
+      }, 500); // Delay before response
+    }
+  });
+
+  function randomizeSelections() {
+      const ids = ["personality", "emotion", "tone", "empathy", "confidence"];
+  
+      ids.forEach(id => {
+        const select = document.getElementById(id);
+        const options = select.options;
+        const randomIndex = Math.floor(Math.random() * options.length);
+        select.selectedIndex = randomIndex;
+      });
+      updateCharacterScore();
+    }
+
+
+
+// Sample scoring function
+function calculateCharacterScore() {
+    let personalityScore = getPersonalityScore();
+    let toneScore = getToneScore();
+    let empathyScore = getEmpathyScore();
+    let confidenceScore = getConfidenceScore();
+    let emotionScore = getEmotionScore();
+
+    // Total character score
+    let totalScore = personalityScore + toneScore + empathyScore + confidenceScore + emotionScore;
+
+    // Return total score
+    return totalScore;
+}
+
+function getPersonalityScore() {
+    let personalitySelection = document.getElementById('personality').value;
+    // Personality scores
+    const personalityScores = {
+        // Positive Traits
+    "Optimistic": 10,
+    "Altruistic": 8,
+    "Charming": 7,
+    "Empathetic": 6,
+    "Enthusiastic": 9,
+    "Supportive": 6,
+    "Confident": 8,
+    "Adventurous": 7,
+    "Kind-hearted": 9,
+    "Cheerful": 7,
+    "Nurturing": 8,
+    "Passionate": 10,
+    "Curious": 7,
+    "Humble": 6,
+    "Creative": 8,
+    "Loyal": 9,
+    "Wise": 8,
+    "Resilient": 8,
+
+    // Negative Traits
+    "Pessimistic": -7,
+    "Cynical": -6,
+    "Apathetic": -5,
+    "Hostile": -9,
+    "Indifferent": -3,
+    "Reserved": -4,
+    "Manipulative": -8,
+    "Arrogant": -6,
+    "Impulsive": -5,
+    "Insecure": -4,
+    "Jealous": -6,
+    "Overbearing": -7,
+    "Stubborn": -5,
+    "Anxious": -4,
+    "Greedy": -6,
+    "Reckless": -6
+};
+    return personalityScores[personalitySelection] || 0;
+}
+
+function getToneScore() {
+    let toneSelection = document.getElementById('tone').value;
+    // Tone scores
+    const toneScores = {
+     "Cheerful": 8,
+    "Charming": 4,
+    "Optimistic": 6,
+    "Excited": 9,
+    "Jovial": 7,
+    "Playful": 5,
+    "Affectionate": 6,
+    "Encouraging": 6,
+    "Confident": 7,
+    "Romantic": 6,
+    "Casual": 0,
+    "Formal": 0,
+    "Philosophical": 3,
+    "Quirky": 2,
+    "Reflective": 2,
+    "Nostalgic": 3,
+    "Inquisitive": 1,
+    "Tense": -1,
+    "Relaxed": 2,
+    "Sarcastic": -5,
+    "Aggressive": -7,
+    "Grim": -6,
+    "Mournful": -6,
+    "Cautious": 0,
+    "Impatient": -3,
+    "Suspicious": -4,
+    "Pessimistic": -5,
+    "Indifferent": -2,
+    "Confused": -3,
+    "Fierce": -5,
+    "Sympathetic": 5,
+    "Fearful": -4,
+    "Tired": -3,
+    "Sentimental": 4,
+    "Skeptical": -2,
+    "Hopeful": 6
+    };
+    if (toneScores.hasOwnProperty(toneSelection)) {
+        return toneScores[toneSelection];
+    } else {
+        // If not found, return 0 or handle as needed
+        console.warn('Selected tone not found in toneScores:', toneSelection);
+        return 0;
+    }
+    toneScores[toneSelection] || 0;
+}
+
+// Add event listeners to all dropdowns to update the score dynamically
+document.getElementById('personality').addEventListener('change', updateCharacterScore);
+document.getElementById('tone').addEventListener('change', updateCharacterScore);
+document.getElementById('empathy').addEventListener('change', updateCharacterScore);
+document.getElementById('confidence').addEventListener('change', updateCharacterScore);
+document.getElementById('emotion').addEventListener('change', updateCharacterScore);
+
+function updateCharacterScore() {
+    let score = calculateCharacterScore();
+    document.getElementById('character-score').innerText = score;
+}
+
+
+function getEmpathyScore() {
+    let empathySelection = document.getElementById('empathy').value;
+    // Empathy scores
+    const empathyScores = {
+        "Very Low": -8,
+        "Low": -4,
+        "Medium": 0,
+        "High": 4,
+        "Very High": 8
+    };
+    return empathyScores[empathySelection] || 0;
+}
+
+function getConfidenceScore() {
+    let confidenceSelection = document.getElementById('confidence').value;
+    // Confidence scores
+    const confidenceScores = {
+        "Very Low": -4,
+        "Low": -2,
+        "Medium": 0,
+        "High": 2,
+        "Very High": 4
+    };
+    return confidenceScores[confidenceSelection] || 0;
+}
+
+function getEmotionScore() {
+    let emotionSelection = document.getElementById('emotion').value;
+    // Emotion scores
+    const emotionScores = {
+    "Euphoria": 10,
+    "Love": 9,
+    "Gratitude": 8,
+    "Exhilaration": 9,
+    "Hope": 8,
+    "Peace": 7,
+    "Optimism": 6,
+    "Inspiration": 8,
+    "Contentment": 7,
+    "Joy": 10,
+    "Despair": -8,
+    "Rage": -9,
+    "Fear": -7,
+    "Grief": -6,
+    "Resentment": -5,
+    "Loneliness": -6,
+    "Frustration": -5,
+    "Envy": -4,
+    "Sadness": -5,
+    "Anger": -6,
+    "Boredom": -2,
+    "Calm": 0,
+    "Confusion": -3,
+    "Embarrassment": -4,
+    "Surprise": 4,
+    "Guilt": -4,
+    "Anticipation": 6,
+    "Nostalgia": 5,
+    "Admiration": 8,
+    "Amusement": 6,
+    "Awe": 7
+};
+    return emotionScores[emotionSelection] || 0;
+}
+
+
+
+  async function queryLLM(prompt) {
+  const personality = document.getElementById('personality').value;
+  const emotionalState = document.getElementById('emotion').value;
+  const tone = document.getElementById('tone').value;
+  const empathy = document.getElementById('empathy').value;
+  const confidence = document.getElementById('confidence').value;
+
+  const res = await fetch("http://localhost:11434/api/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "phi3.5",
+      prompt: `You are now Eve. Right now, you’re feeling "${emotionalState}", and your personality is best described as "${personality}". You naturally speak with a "${tone}" tone.
+You tend to show ${empathy} levels of empathy and ${confidence} levels of self-assurance. Let these qualities shape how you respond—just like a real person would, without overexplaining them.
+Respond authentically, as someone with thoughts, emotions, and personal nuance—not as an assistant or machine. Be real. Be you.
+\n\n${prompt}`,
+      stream: false,
+      temperature: 0.7,      // balance between creativity and speed
+      top_p: 0.9,           // controls sampling diversity
+    })
+  });
+
+  const data = await res.json();
+  return data.response || "[No response]";
+};
+
+</script>
+
+</body>
+</html>
